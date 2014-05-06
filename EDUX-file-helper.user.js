@@ -7,6 +7,7 @@
 // @require     http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js
 // @require     http://stuk.github.io/jszip/dist/jszip.js
 // @require     http://stuk.github.io/jszip-utils/dist/jszip-utils.js
+// @require     https://raw.githubusercontent.com/eligrey/FileSaver.js/master/FileSaver.js
 // @match      https://edux.fit.cvut.cz/courses/*
 // @copyright  2014+, flex
 // ==/UserScript==
@@ -17,6 +18,35 @@ this.$ = this.jQuery = jQuery.noConflict(true);
 
 $(function(){
 	//var namespaces_to_search = ["", "lectures", "labs"];
+
+	var course_files = [];
+
+	var download_all_zip = function(course, files) {
+		var zip = new JSZip();
+
+		var requests = files.map(function(file) {
+			return $.ajax(file, {
+		    dataType: "text",
+		    beforeSend: function( xhr, settings ) {
+		        xhr.overrideMimeType( "text/plain; charset=x-user-defined");
+		        xhr.url = settings.url;
+		    },
+				success: function(data, status, xhr) {
+					var url = xhr.url;
+					var url_parts = url.split("/");
+					var file_name = url_parts[url_parts.length - 1];
+					//zip.file("Hello.txt", "Hello World\n");
+					zip.file(file_name, data, {binary: true});
+				}
+			});	
+		});
+
+		$.when.apply(null, requests).done(function() {
+			var content = zip.generate({type:"blob"});
+			// see FileSaver.js
+			saveAs(content, "example.zip");
+		});
+	};
 
 
 	var get_child_namespaces = function(doc, parent_namespace, current_depth) {
@@ -39,6 +69,7 @@ $(function(){
 		[].forEach.call(file_nodes, function(file_node) {
 			var link = file_node.querySelector("a:nth-child(3)");
 			console.log(link.href);
+			course_files.push(link.href);
 		});
 	};
 
@@ -75,14 +106,7 @@ $(function(){
 	
 	fetch_ns_info("MI-PIS", "", 0);
 
-	// $.get("https://edux.fit.cvut.cz/courses/MI-SPI/_media/lectures/mi-spi-lec01-probabilityreview.pdf", function(data) {
+	var files = ["https://edux.fit.cvut.cz/courses/MI-SPI/_media/lectures/mi-spi-lec01-probabilityreview.pdf", "https://edux.fit.cvut.cz/courses/MI-SPI/_media/lectures/mi-spi-lec03-randomvariables.pdf"];
 
-	// });
-
-	var zip = new JSZip();
-	zip.file("Hello.txt", "Hello World\n");
-	var content = zip.generate({type:"blob"});
-	// see FileSaver.js
-	saveAs(content, "example.zip");
 });
 
