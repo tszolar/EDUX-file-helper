@@ -38,14 +38,14 @@ $(function(){
 					//zip.file("Hello.txt", "Hello World\n");
 					zip.file(file_name, data, {binary: true});
 				}
-			});	
-		});
+			});				
 
 		$.when.apply(null, requests).done(function() {
 			var content = zip.generate({type:"blob"});
 			// see FileSaver.js
 			saveAs(content, "example.zip");
 		});
+	});
 	};
 
 
