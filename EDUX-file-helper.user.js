@@ -25,7 +25,8 @@ this.$ = this.jQuery = jQuery.noConflict(true);
 $(function(){
 	document.body.appendChild(document.createElement('div')).id = "download-dialog";
 	$( ".funding" ).before("<h2>File exports</h2><ul><li><a href='#' id='file_export_all' class='wikilink1'>Download all files</a></ul>");
-
+	var path = window.location.pathname.split( '/' );
+	var course_code = path[2];
 
 	// $( "#download-dialog" ).dialog({
 	// 	autoOpen: false,
@@ -64,13 +65,14 @@ $(function(){
 	var course_files = [];
 
 	var download_files = function(files_to_download, zip, batch, batch_cnt) {
+		console.log("Running batch " + batch + ". File count "+batch_cnt);
 		var file_cnt = files_to_download.length;
-		var batch_size = 30; 
+		var batch_size = 30;
 		if(file_cnt <= 0 || batch_cnt >= batch_size) {
 			
 			var content = zip.generate({type:"blob"});
 			// see FileSaver.js
-			saveAs(content, "export_"+batch+".zip");
+			saveAs(content, course_code+"_export_"+batch+".zip");
 
 			if(file_cnt <= 0) return;
 			else {
@@ -108,6 +110,7 @@ $(function(){
 	};
 
 	var download_all_zip = function(files_to_download) {
+		console.log("Got " + course_files.length + " files.")
 		var zip = new JSZip();
 		var files = files_to_download;//.splice(0, 30);
 		download_files(files, zip, 1, 0);	
@@ -127,14 +130,13 @@ $(function(){
 	};
 
 	var process_files = function(file_nodes, namespace) {
-		console.log("Files for "+namespace+":");
-		console.log(file_nodes);
+		// console.log("Files for "+namespace+":");
+		// console.log(file_nodes);
 		//file_nodes.querySelector("");
 
 		[].forEach.call(file_nodes, function(file_node) {
 			var link = file_node.querySelector("a:nth-child(3)");
 			var href = link.getAttribute('href');
-			console.log(href);
 			course_files.push(href);
 		});
 	};
@@ -167,17 +169,15 @@ $(function(){
 		$.get(url, success);
 	};
 
-	var course_code = "MI-PIS";
+	
 	var namespace = "lectures";
 	
-	fetch_ns_info("MI-SPI", "", 0);
+	fetch_ns_info(course_code, "", 0);
 
 	$( "#file_export_all").click(function(event){
 		event.preventDefault();
 		download_all_zip(course_files);
 	});
-
-	var files = ["https://edux.fit.cvut.cz/courses/MI-SPI/_media/lectures/mi-spi-lec01-probabilityreview.pdf", "https://edux.fit.cvut.cz/courses/MI-SPI/_media/lectures/mi-spi-lec03-randomvariables.pdf"];
 
 });
 
