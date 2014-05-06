@@ -63,14 +63,23 @@ $(function(){
 
 	var course_files = [];
 
-	var download_files = function(files_to_download, zip) {
-		if(files_to_download.length <= 0) {
+	var download_files = function(files_to_download, zip, batch, batch_cnt) {
+		var file_cnt = files_to_download.length;
+		var batch_size = 30; 
+		if(file_cnt <= 0 || batch_cnt >= batch_size) {
+			
 			var content = zip.generate({type:"blob"});
 			// see FileSaver.js
-			saveAs(content, "example.zip");
-			return;
+			saveAs(content, "export_"+batch+".zip");
+
+			if(file_cnt <= 0) return;
+			else {
+				batch += 1;
+				batch_cnt = 0;
+				zip = new JSZip();
+			}
 		}
-		var page_size = 5;
+		var page_size = 10;
 
 		var files = files_to_download.slice(0, page_size);
 		var rest = files_to_download.slice(page_size);
@@ -94,13 +103,14 @@ $(function(){
 		});
 
 		$.when.apply(null, requests).done(function() {
-			download_files(rest, zip);
+			download_files(rest, zip, batch, batch_cnt + page_size);
 		});
 	};
 
 	var download_all_zip = function(files_to_download) {
 		var zip = new JSZip();
-		download_files(files_to_download, zip);	
+		var files = files_to_download;//.splice(0, 30);
+		download_files(files, zip, 1, 0);	
 	};
 
 
@@ -160,7 +170,7 @@ $(function(){
 	var course_code = "MI-PIS";
 	var namespace = "lectures";
 	
-	fetch_ns_info("MI-FLP", "", 0);
+	fetch_ns_info("MI-SPI", "", 0);
 
 	$( "#file_export_all").click(function(event){
 		event.preventDefault();
