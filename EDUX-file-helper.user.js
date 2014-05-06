@@ -10,8 +10,10 @@
 // @match      https://edux.fit.cvut.cz/courses/*
 // @copyright  2014+, flex
 // ==/UserScript==
-this.$ = this.jQuery = jQuery.noConflict(true);
 
+'use strict';
+
+this.$ = this.jQuery = jQuery.noConflict(true);
 
 $(function(){
 	//var namespaces_to_search = ["", "lectures", "labs"];
@@ -77,10 +79,10 @@ $(function(){
 
 	// });
 
-	// var zip = new JSZip();
-	// zip.file("Hello.txt", "Hello World\n");
-	// var content = zip.generate({type:"blob"});
-	// // see FileSaver.js
-	// saveAs(content, "example.zip");
+	var zip = new JSZip();
+	zip.file("Hello.txt", "Hello World\n");
+	var content = zip.generate({type:"blob"});
+	// see FileSaver.js
+	saveAs(content, "example.zip");
 });
 
